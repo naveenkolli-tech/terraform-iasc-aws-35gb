@@ -1,5 +1,5 @@
 my_ip          = "xx.xxx.xxx.xxx"
-key_pair_name = "naveennew_key"
+key_pair_name = "your key name"
 
 
 # for my ip : create one in ur cloude 
