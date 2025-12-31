@@ -146,3 +146,4 @@ resource "aws_instance" "jenkins_controller" {
     Name = "jenkins-controller"
   }
 }
+
