@@ -13,9 +13,9 @@ provider "aws" {
   region = var.aws_region
 }
 
-# -------------------------------
-# Ubuntu 22.04 AMI
-# -------------------------------
+# ------------------------------------------------
+# Ubuntu 22.04 AMI (Canonical)
+# ------------------------------------------------
 data "aws_ami" "ubuntu" {
   most_recent = true
   owners      = ["099720109477"]
@@ -26,9 +26,9 @@ data "aws_ami" "ubuntu" {
   }
 }
 
-# -------------------------------
+# ------------------------------------------------
 # VPC
-# -------------------------------
+# ------------------------------------------------
 resource "aws_vpc" "this" {
   cidr_block           = "10.50.0.0/16"
   enable_dns_support   = true
@@ -39,9 +39,9 @@ resource "aws_vpc" "this" {
   }
 }
 
-# -------------------------------
+# ------------------------------------------------
 # Internet Gateway
-# -------------------------------
+# ------------------------------------------------
 resource "aws_internet_gateway" "this" {
   vpc_id = aws_vpc.this.id
 
@@ -50,9 +50,9 @@ resource "aws_internet_gateway" "this" {
   }
 }
 
-# -------------------------------
+# ------------------------------------------------
 # Public Subnet
-# -------------------------------
+# ------------------------------------------------
 resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.this.id
   cidr_block              = "10.50.1.0/24"
@@ -64,9 +64,9 @@ resource "aws_subnet" "public" {
   }
 }
 
-# -------------------------------
+# ------------------------------------------------
 # Route Table
-# -------------------------------
+# ------------------------------------------------
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.this.id
 
@@ -85,9 +85,9 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public.id
 }
 
-# -------------------------------
-# Security Group
-# -------------------------------
+# ------------------------------------------------
+# Security Group (AUTO-UNIQUE)
+# ------------------------------------------------
 resource "aws_security_group" "ec2_sg" {
   name_prefix = "${var.instance_name}-sg-"
   vpc_id      = aws_vpc.this.id
@@ -110,9 +110,9 @@ resource "aws_security_group" "ec2_sg" {
   }
 }
 
-# -------------------------------
-# EC2 INSTANCE (PUBLIC FOR REAL)
-# -------------------------------
+# ------------------------------------------------
+# EC2 INSTANCE (USER-DEFINED DISK SIZE)
+# ------------------------------------------------
 resource "aws_instance" "ec2" {
   ami                         = data.aws_ami.ubuntu.id
   instance_type               = var.instance_type
@@ -121,6 +121,13 @@ resource "aws_instance" "ec2" {
   associate_public_ip_address = true
 
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
+
+  # 🔥 USER DECIDES DISK SIZE
+  root_block_device {
+    volume_size = var.root_volume_size_gb
+    volume_type = "gp3"
+    encrypted   = true
+  }
 
   tags = {
     Name = var.instance_name
